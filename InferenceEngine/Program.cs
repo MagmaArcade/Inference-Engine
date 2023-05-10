@@ -10,9 +10,32 @@ namespace InferenceEngine
     {
         static void Main(string[] args)
         {
-            ReadKB fileread = new ReadKB("test_HornKB.txt");
-            fileread.ParseHornKB();
-            fileread.PrintEnvironData();
+            ReadKB fileread = new ReadKB(args[1]);
+
+            fileread.ParseHornKB();     // this is used to parse the raw data 
+
+            //fileread.PrintEnvironData();   // this is used to test the input data and data parse
+
+
+            Algorithms Algorithm = new Algorithms();
+
+            switch (args[0].ToLower())
+            {
+                case "tt":
+                    Console.WriteLine(Algorithm.TruthTable());
+                    break;
+                case "fc":
+                    Console.WriteLine(Algorithm.ForwardChanneling());
+                    break;
+                case "bc":
+                    Console.WriteLine(Algorithm.BackwardChanneling());
+                    break;
+                default:
+                    Console.WriteLine("No search method called " + args[0]);
+                    break;
+            }
+
+
             Console.ReadLine();
 
         }

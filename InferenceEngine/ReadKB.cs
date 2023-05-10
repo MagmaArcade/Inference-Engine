@@ -17,6 +17,14 @@ namespace InferenceEngine
         private string[] _propositionSymbol;
 
 
+        // Read Only Properties 
+        public string[] HornKB{
+            get { return _hornkb; }}
+        public string Query{
+            get { return _query; }}
+
+
+        // read in the raw data
         public ReadKB (string testfile)
         {
             _filename = testfile;
@@ -24,7 +32,6 @@ namespace InferenceEngine
             _file = new StreamReader(_filename);
             ReadEnvironData();
         }
-
         public void ReadEnvironData()
         {
             string currentLine = _file.ReadLine();
@@ -35,6 +42,8 @@ namespace InferenceEngine
             }
         }
 
+
+        //parse the raw data
         public void ParseHornKB()
         {
             for (int i = 0; i < _rawdata.Count; i++)
@@ -49,7 +58,6 @@ namespace InferenceEngine
 
                     //removes duplicate variables
                     _propositionSymbol = _temp.Distinct().ToArray();
-
                 }
  
                 if (_rawdata[i] == "ASK")
@@ -63,11 +71,11 @@ namespace InferenceEngine
             {
                 _hornkb[i] = _hornkb[i].Trim(' ');
             }
-
-
         }
 
-        public void PrintEnvironData() /* for development testing purposes, not actually called during final program execution */
+
+        // for development testing purposes, not actually called during final program execution
+        public void PrintEnvironData() 
         {
             Console.WriteLine("The Raw Input File:");
             _rawdata.ForEach(Console.WriteLine);
@@ -83,17 +91,6 @@ namespace InferenceEngine
             {
                 Console.WriteLine(_propositionSymbol[i]);
             }
-
-        }
-
-        public string[] HornKB
-        {
-            get { return _hornkb; }
-        }
-
-        public string Query
-        {
-            get { return _query;  }
         }
     }
 }
