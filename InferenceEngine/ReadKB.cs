@@ -43,13 +43,13 @@ namespace InferenceEngine
                 {
                     _hornkb = _rawdata[i + 1].Split(';');
 
-                    string[] delimiters = new string[] { "=>", "<=>", "&", "~", "||", ";" };
-                    string[] parts = _rawdata[i + 1].Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+                    //gets all individual variables 
+                    string[] delimiters = new string[] { "=>", "<=>", "&", "~", "||", ";", " "};
+                    string[] _temp = _rawdata[i + 1].Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
-                   foreach(string part in parts)
-                   {
-                        var _propositionSymbol = part.Trim();
-                   }
+                    //removes duplicate variables
+                    _propositionSymbol = _temp.Distinct().ToArray();
+
                 }
  
                 if (_rawdata[i] == "ASK")
@@ -69,12 +69,16 @@ namespace InferenceEngine
 
         public void PrintEnvironData() /* for development testing purposes, not actually called during final program execution */
         {
+            Console.WriteLine("The Raw Input File:");
             _rawdata.ForEach(Console.WriteLine);
+            Console.WriteLine();
+            Console.WriteLine("The Horn Clauses:");
             for (int i = 0; i < _hornkb.Count(); i++)
             {
                 Console.WriteLine(_hornkb[i]);
             }
-
+            Console.WriteLine();
+            Console.WriteLine("The Proposition Symbol:");
             for (int i = 0; i < _propositionSymbol.Count(); i++)
             {
                 Console.WriteLine(_propositionSymbol[i]);
