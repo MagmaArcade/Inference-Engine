@@ -11,6 +11,7 @@ namespace InferenceEngine
         static void Main(string[] args)
         {
             ReadKB fileread = new ReadKB("test_HornKB.txt");
+            fileread.ParseHornKB();
             fileread.PrintEnvironData();
             Console.ReadLine();
 

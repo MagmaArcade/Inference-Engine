@@ -7,11 +7,15 @@ using System.Threading.Tasks;
 
 namespace InferenceEngine
 {
-    internal class ReadKB
+    class ReadKB
     {
         private string _filename;
         private StreamReader _file;
         private List<string> _rawdata;
+        private string[] _hornkb; // array of strings that contain horn clauses
+        private string _query; // query string
+        private string[] _propositionSymbol;
+
 
         public ReadKB (string testfile)
         {
@@ -31,21 +35,61 @@ namespace InferenceEngine
             }
         }
 
-        public List<string> ParseHornKB()
+        public void ParseHornKB()
         {
-            for(int i = 0; i < _rawdata.Count; i++)
+            for (int i = 0; i < _rawdata.Count; i++)
             {
                 if (_rawdata[i] == "TELL")
                 {
-                    List<string> hornkb = 
+                    _hornkb = _rawdata[i + 1].Split(';');
+
+                    string[] delimiters = new string[] { "=>", "<=>", "&", "~", "||", ";" };
+                    string[] parts = _rawdata[i + 1].Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+
+                   foreach(string part in parts)
+                   {
+                        var _propositionSymbol = part.Trim();
+                   }
+                }
+ 
+                if (_rawdata[i] == "ASK")
+                {
+                    _query = _rawdata[i + 1];
                 }
             }
-        }
 
+            _hornkb = _hornkb.Take(_hornkb.Length - 1).ToArray(); // remove the last (blank) element from the array
+            for (int i = 0; i < _hornkb.Count(); i++) // 
+            {
+                _hornkb[i] = _hornkb[i].Trim(' ');
+            }
+
+
+        }
 
         public void PrintEnvironData() /* for development testing purposes, not actually called during final program execution */
         {
             _rawdata.ForEach(Console.WriteLine);
+            for (int i = 0; i < _hornkb.Count(); i++)
+            {
+                Console.WriteLine(_hornkb[i]);
+            }
+
+            for (int i = 0; i < _propositionSymbol.Count(); i++)
+            {
+                Console.WriteLine(_propositionSymbol[i]);
+            }
+
+        }
+
+        public string[] HornKB
+        {
+            get { return _hornkb; }
+        }
+
+        public string Query
+        {
+            get { return _query;  }
         }
     }
 }
