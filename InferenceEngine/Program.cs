@@ -10,6 +10,10 @@ namespace InferenceEngine
     {
         static void Main(string[] args)
         {
+            ReadKB fileread = new ReadKB("test_HornKB.txt");
+            fileread.PrintEnvironData();
+            Console.ReadLine();
+
         }
     }
 }
