@@ -13,7 +13,7 @@ namespace InferenceEngine
         private StreamReader _file;
         private List<string> _rawdata;
         private string[] _hornkb; // array of strings that contain horn clauses
-        private string _query; // query string
+        private string _query; // query string (goal state)
         private string[] _propositionSymbol;
 
 
@@ -22,6 +22,8 @@ namespace InferenceEngine
             get { return _hornkb; }}
         public string Query{
             get { return _query; }}
+        public string[] PropositionSymbol{
+            get { return _propositionSymbol; }}
 
 
         // read in the raw data

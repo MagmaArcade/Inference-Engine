@@ -17,7 +17,7 @@ namespace InferenceEngine
             //fileread.PrintEnvironData();   // this is used to test the input data and data parse
 
 
-            Algorithms Algorithm = new Algorithms();
+            Algorithms Algorithm = new Algorithms(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
 
             switch (args[0].ToLower())
             {
