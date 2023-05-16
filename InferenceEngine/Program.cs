@@ -14,7 +14,7 @@ namespace InferenceEngine
 
             fileread.ParseHornKB();     // this is used to parse the raw data 
 
-            //fileread.PrintEnvironData();   // this is used to test the input data and data parse
+            fileread.PrintEnvironData();   // this is used to test the input data and data parse
 
 
             Algorithms Algorithm = new Algorithms(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
@@ -22,7 +22,7 @@ namespace InferenceEngine
             switch (args[0].ToLower())
             {
                 case "tt":
-                    Console.WriteLine(Algorithm.TruthTable());
+                    Algorithm.TruthTable();
                     break;
                 case "fc":
                     Console.WriteLine(Algorithm.ForwardChanneling());

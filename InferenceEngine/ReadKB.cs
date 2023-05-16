@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions; // needed for RegEx to remove whitespaces :)
 
 namespace InferenceEngine
 {
@@ -69,10 +70,14 @@ namespace InferenceEngine
             }
 
             _hornkb = _hornkb.Take(_hornkb.Length - 1).ToArray(); // remove the last (blank) element from the array
-            for (int i = 0; i < _hornkb.Count(); i++) // 
+            
+            for (int i = 0; i < _hornkb.Count(); i++) // remove whitespace from every query (ease of use later)
             {
-                _hornkb[i] = _hornkb[i].Trim(' ');
+                string initial = _hornkb[i];
+                initial = Regex.Replace(initial, @"\s", "");
+                _hornkb[i] = initial;
             }
+
         }
 
 

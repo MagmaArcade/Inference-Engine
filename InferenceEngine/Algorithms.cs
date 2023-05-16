@@ -21,9 +21,9 @@ namespace InferenceEngine
             _propositionSymbol = PropositionSymbol;
         }
 
-        public string TruthTable()
+        public void TruthTable()
         {
-            return null;
+            TruthTable tt = new TruthTable(_hornkb, _query, _propositionSymbol);
         }
 
         public string ForwardChanneling()
