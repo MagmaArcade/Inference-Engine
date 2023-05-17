@@ -35,7 +35,6 @@ namespace InferenceEngine
                     break;
             }
 
-
             Console.ReadLine();
 
         }

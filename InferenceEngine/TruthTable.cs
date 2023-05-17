@@ -12,28 +12,49 @@ namespace InferenceEngine
         private string[] _hornkb; // array of strings that contain horn clauses
         private string _query; // query string (goal state)
         private string[] _propositionSymbol;
-        private List<int> _symbolTT;
+        private int[,] _truthtable;
+
 
         public TruthTable(string[] HornKB, string Query, string[] PropositionSymbol) : base(HornKB, Query, PropositionSymbol)
         {
             _hornkb = HornKB;
             _query = Query;
             _propositionSymbol = PropositionSymbol;
-            _symbolTT = new List<int> { };
-             generateAllTruthTable(_propositionSymbol.Count(), _symbolTT, Math.Pow(2, _propositionSymbol.Length));
+            int numbits = _propositionSymbol.Length;
+
+            int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
+            _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
+
+             generateBinaryStrings(_propositionSymbol.Length, _binaryStrings, 0, 0);
         }
 
-        static void generateAllTruthTable(int n, List<int> ttarray, double count)
+        public void generateBinaryStrings(int n, int[] bitarray, int arrpos, int rowcount) // credit for core backchannelling framework: https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/
         {
-            if (count == 0)
+            if (arrpos == n)
             {
+                addToTruthTable(n, bitarray, rowcount);
                 return;
             }
-            
-            ttarray[n - 1] = 0;
-            generateAllTruthTable(n - 1, ttarray, count - 1);
-            ttarray[n - 1] = 1;
-            generateAllTruthTable(n - 1, ttarray, count - 1);
+
+            bitarray[arrpos] = 0;
+            generateBinaryStrings(n, bitarray, arrpos + 1, rowcount);
+
+            bitarray[arrpos] = 1;
+            generateBinaryStrings(n, bitarray, arrpos + 1, rowcount);
+        }
+
+        public void addToTruthTable(int n, int[] bitarray, int rowcount)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                _truthtable[i, rowcount] = bitarray[i];
+                Console.Write(_truthtable[i, rowcount] + " "); // the two Console.Write statements were used in development to print out the truth table for each symbol
+            }
+            Console.WriteLine();
+
+            rowcount++;
+
+            return;
         }
     }
 }
