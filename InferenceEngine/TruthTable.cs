@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,39 +12,28 @@ namespace InferenceEngine
         private string[] _hornkb; // array of strings that contain horn clauses
         private string _query; // query string (goal state)
         private string[] _propositionSymbol;
-        private int[] _symbolTT;
+        private List<int> _symbolTT;
 
         public TruthTable(string[] HornKB, string Query, string[] PropositionSymbol) : base(HornKB, Query, PropositionSymbol)
         {
             _hornkb = HornKB;
             _query = Query;
             _propositionSymbol = PropositionSymbol;
-            _symbolTT = new int[] { };
-            generateAllBinaryStrings(_propositionSymbol.Count(), _symbolTT, 0);
+            _symbolTT = new List<int> { };
+             generateAllTruthTable(_propositionSymbol.Count(), _symbolTT, Math.Pow(2, _propositionSymbol.Length));
         }
 
-        static void generateAllBinaryStrings(int n, int[] arr, int i)
+        static void generateAllTruthTable(int n, List<int> ttarray, double count)
         {
-            if (i == n)
+            if (count == 0)
             {
-                for (int c = 0; c < n; c++)
-                {
-                    Console.Write(arr[c] + " ");
-                }
-                Console.WriteLine();
+                return;
             }
-
-            // First assign "0" at ith position
-            // and try for all other permutations
-            // for remaining positions
-            arr[i] = 0;
-            generateAllBinaryStrings(n, arr, i + 1);
-
-            // And then assign "1" at ith position
-            // and try for all other permutations
-            // for remaining positions
-            arr[i] = 1;
-            generateAllBinaryStrings(n, arr, i + 1);
+            
+            ttarray[n - 1] = 0;
+            generateAllTruthTable(n - 1, ttarray, count - 1);
+            ttarray[n - 1] = 1;
+            generateAllTruthTable(n - 1, ttarray, count - 1);
         }
     }
 }
