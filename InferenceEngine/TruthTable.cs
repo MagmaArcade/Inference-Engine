@@ -48,9 +48,9 @@ namespace InferenceEngine
             for (int i = 0; i < n; i++)
             {
                 _truthtable[i, rowcount] = bitarray[i];
-                Console.Write(_truthtable[i, rowcount] + " "); // the two Console.Write statements were used in development to print out the truth table for each symbol
+                // Console.Write(_truthtable[i, rowcount] + " "); // the two Console.Write statements were used in development to print out the truth table for each symbol
             }
-            Console.WriteLine();
+            // Console.WriteLine();
 
             rowcount++;
 
