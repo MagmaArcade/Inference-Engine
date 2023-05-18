@@ -31,56 +31,101 @@ namespace InferenceEngine
             
             _postfixSentences = generatePostfixArrays(_hornkb);
 
-            _evaluatedPostfixSentences = evaluatePostfixSentences(_postfixSentences, _truthtable, numbits); // passing in numbits as the evaluations int[,] has to know the amount of models there is
+            _evaluatedPostfixSentences = evaluatePostfixSentences(_postfixSentences, _truthtable, _propositionSymbol);
 
         }
 
-        public int[,] evaluatePostfixSentences(List<string[]> postfixSentences, int[,] truthtable, int models)
+        public int[,] evaluatePostfixSentences(List<string[]> postfixSentences, int[,] truthtable, string[] propSymbols) // Great overview of postfix expressions and how to evaluate them using a stack: https://www2.cs.sfu.ca/CourseCentral/125/tjd/postfix.html
         {
-            int[,] evaluations = new int[postfixSentences.Count(), (int)Math.Pow(2, models)]; // will create a new array with columns = sentences & # rows = the # of models shown in the TT
-            int count = 0; // don't know if this is needed yet
+            int[,] evaluations = new int[postfixSentences.Count(), truthtable.GetLength(1)]; ; // will create a new array with columns = sentences & # rows = the # of models shown in the TT
 
-            foreach (string[] postfix in postfixSentences)
+            for (int modelcount = 2047; modelcount < truthtable.GetLength(1); modelcount++) // a for loop to go through every single model in the truth table
+                //
+                // ATTENTION NICHOLAS - THIS HAS BEEN CHANGED TO 2047 FOR DEBUGGING - WHEN ITS NOT WORKING CHANGE IT BACK TO 0
+                //
             {
-                Stack<string> symbolstack = new Stack<string>(); // the stack used to evaluate each postfix array
-
-                for (int i = 0; i < postfix.Length; i++)
+                foreach (string[] postfix in postfixSentences)
                 {
-                    if (postfix[i] == "=>") // implication symbol
+                    Stack<string> symbolstack = new Stack<string>(); // the stack used to evaluate each postfix array
+
+                    for (int i = 0; i < postfix.Length; i++)
                     {
-                        string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
-                        string a = symbolstack.Pop();
-                        symbolstack.Push(evaluateImplication(truthtable, a, b, count));
-                        Console.WriteLine(symbolstack.Peek());
+                        if (postfix[i] == "=>") // implication symbol
+                        {
+                            string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
+                            string a = symbolstack.Pop();
+                            symbolstack.Push(evaluateImplication(truthtable, a, b, modelcount, propSymbols));
+                            // Console.WriteLine(symbolstack.Peek());
+                        }
+                        else if (postfix[i] == "&") // conjunction symbol
+                        {
+                            string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
+                            string a = symbolstack.Pop();
+                            symbolstack.Push(evaluateConjunction(truthtable, a, b, modelcount, propSymbols));
+                            // Console.WriteLine(symbolstack.Peek());
+                        }
+                        else
+                        {
+                            symbolstack.Push(postfix[i]); // propositional symbols
+                            // Console.WriteLine($"pushed {postfix[i]} onto the stack");
+                        }
                     }
-                    else if (postfix[i] == "&") // conjunction symbol
-                    {
-                        string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
-                        string a = symbolstack.Pop();
-                        symbolstack.Push(evaluateConjunction(truthtable, a, b, count));
-                        Console.WriteLine(symbolstack.Peek());
-                    }
-                    else
-                    {
-                        symbolstack.Push(postfix[i]); // propositional symbols
-                        Console.WriteLine($"pushed {postfix[i]} onto the stack");
-                    }
+
+                    // is here where we lift the top number off the stack and assign it accordingly to it's proper sentence and proper model in the evaluations 2D array
+                    // WILL HAVE TO CONVERT STRING TO INT
+                    // it is for every implication sentence in the list of postfixed sentences, but outside of the model increment (so still part of a loop)
+
                 }
-                Console.WriteLine("-----------------");
-
-            }
-
+                modelcount++;
+        }
 
             return evaluations;
         }
 
-        public string evaluateImplication(int[,] truthtable, string a, string b, int count)
+        public string evaluateImplication(int[,] truthtable, string a, string b, int count, string[] propSymbolsList)
         {
+            int indexA = 0;
+            int indexB = 0;
+
+            for(int i = 0; i < propSymbolsList.Length; i++) // gets the column value for the two symbols (used to look them up in the TT)
+            {
+                if (propSymbolsList[i] == a)
+                {
+                    indexA = i;
+                }
+
+                if (propSymbolsList[i] == b)
+                {
+                    indexB = i;
+                }
+            }
+
+            // Console.WriteLine($"implication: {a} is at position {indexA}, {b} is at position {indexB}");
+
+
             return $"implication of {a} & {b}";
         }
 
-        public string evaluateConjunction(int[,] truthtable, string a, string b, int count)
+        public string evaluateConjunction(int[,] truthtable, string a, string b, int count, string[] propSymbolsList)
         {
+            int indexA = 0;
+            int indexB = 0;
+
+            for (int i = 0; i < propSymbolsList.Length; i++) // gets the column value for the two symbols (used to look them up in the TT)
+            {
+                if (propSymbolsList[i] == a)
+                {
+                    indexA = i;
+                }
+
+                if (propSymbolsList[i] == b)
+                {
+                    indexB = i;
+                }
+            }
+
+            // Console.WriteLine($"conjunction: {a} is at position {indexA}, {b} is at position {indexB}");
+
             return $"(conjunction of {a} & {b})";
         }
 
@@ -173,6 +218,7 @@ namespace InferenceEngine
         // the following code printed out postfixed versions of each sentence for development purposes
         public void printPostfixedSentences(List<string[]> postfixSentences)
         {
+            Console.WriteLine("The KB sentences after being placed into postfix arrays:");
             foreach (string[] i in postfixSentences)
             {
                 foreach (string n in i)
@@ -183,6 +229,7 @@ namespace InferenceEngine
 
                 Console.WriteLine();
             }
+            Console.WriteLine("---------------------------------");
         }
     }
 }
