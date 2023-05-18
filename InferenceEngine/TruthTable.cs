@@ -14,6 +14,7 @@ namespace InferenceEngine
         private string[] _propositionSymbol;
         private int[,] _truthtable;
         private List<string[]> _postfixSentences; // list of arrays that contain kb sentences expressed in a postfix manner
+        private int[,] _evaluatedPostfixSentences; // a 2D array of True/False values for each postfixed sentence
 
 
         public TruthTable(string[] HornKB, string Query, string[] PropositionSymbol) : base(HornKB, Query, PropositionSymbol)
@@ -21,13 +22,66 @@ namespace InferenceEngine
             _hornkb = HornKB;
             _query = Query;
             _propositionSymbol = PropositionSymbol;
-            int numbits = _propositionSymbol.Length;
 
-            int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
-            _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
+                int numbits = _propositionSymbol.Length;
+                int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
+                _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
 
-            generateBinaryStrings(_propositionSymbol.Length, _binaryStrings, 0, 0);
+            generateBinaryStrings(_propositionSymbol.Length, _binaryStrings, 0, 0); // assigns actual values to _truthtable - cannot return int[,] because it is a recursively called method, it is acts as void and assigns to a class field
+            
             _postfixSentences = generatePostfixArrays(_hornkb);
+
+            _evaluatedPostfixSentences = evaluatePostfixSentences(_postfixSentences, _truthtable, numbits); // passing in numbits as the evaluations int[,] has to know the amount of models there is
+
+        }
+
+        public int[,] evaluatePostfixSentences(List<string[]> postfixSentences, int[,] truthtable, int models)
+        {
+            int[,] evaluations = new int[postfixSentences.Count(), (int)Math.Pow(2, models)]; // will create a new array with columns = sentences & # rows = the # of models shown in the TT
+            int count = 0; // don't know if this is needed yet
+
+            foreach (string[] postfix in postfixSentences)
+            {
+                Stack<string> symbolstack = new Stack<string>(); // the stack used to evaluate each postfix array
+
+                for (int i = 0; i < postfix.Length; i++)
+                {
+                    if (postfix[i] == "=>") // implication symbol
+                    {
+                        string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
+                        string a = symbolstack.Pop();
+                        symbolstack.Push(evaluateImplication(truthtable, a, b, count));
+                        Console.WriteLine(symbolstack.Peek());
+                    }
+                    else if (postfix[i] == "&") // conjunction symbol
+                    {
+                        string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
+                        string a = symbolstack.Pop();
+                        symbolstack.Push(evaluateConjunction(truthtable, a, b, count));
+                        Console.WriteLine(symbolstack.Peek());
+                    }
+                    else
+                    {
+                        symbolstack.Push(postfix[i]); // propositional symbols
+                        Console.WriteLine($"pushed {postfix[i]} onto the stack");
+                    }
+                }
+                Console.WriteLine("-----------------");
+
+            }
+
+
+            return evaluations;
+        }
+
+        public string evaluateImplication(int[,] truthtable, string a, string b, int count)
+        {
+            return $"implication of {a} & {b}";
+        }
+
+        public string evaluateConjunction(int[,] truthtable, string a, string b, int count)
+        {
+            return $"(conjunction of {a} & {b})";
         }
 
         public void generateBinaryStrings(int n, int[] bitarray, int arrpos, int rowcount) // credit for core backchannelling framework: https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/
@@ -68,8 +122,8 @@ namespace InferenceEngine
                 if (sentence.Contains("=>") && sentence.Contains("&")) // contains both implication and conjunction
                 {
                     string[] splitimp = splitAtImplication(sentence);
-                    splitimp = splitAtConjunction(splitimp);
-                    postfixes.Add(splitimp);
+                    string [] splitconj = splitAtConjunction(splitimp);
+                    postfixes.Add(splitconj);
                 }
                 else if (sentence.Contains("=>") && !sentence.Contains("&")) // contains just an implication
                 {
@@ -82,7 +136,7 @@ namespace InferenceEngine
                 }
             }
 
-            // printPostfixedSentences(postfixes); // function call to print to console for dev purposes
+            printPostfixedSentences(postfixes); // function call to print to console for dev purposes
 
             return postfixes;
         }
