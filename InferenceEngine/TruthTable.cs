@@ -13,6 +13,7 @@ namespace InferenceEngine
         private string _query; // query string (goal state)
         private string[] _propositionSymbol;
         private int[,] _truthtable;
+        private List<string[]> _postfixSentences; // list of arrays that contain kb sentences expressed in a postfix manner
 
 
         public TruthTable(string[] HornKB, string Query, string[] PropositionSymbol) : base(HornKB, Query, PropositionSymbol)
@@ -25,7 +26,8 @@ namespace InferenceEngine
             int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
             _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
 
-             generateBinaryStrings(_propositionSymbol.Length, _binaryStrings, 0, 0);
+            generateBinaryStrings(_propositionSymbol.Length, _binaryStrings, 0, 0);
+            _postfixSentences = generatePostfixArrays(_hornkb);
         }
 
         public void generateBinaryStrings(int n, int[] bitarray, int arrpos, int rowcount) // credit for core backchannelling framework: https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/
@@ -55,6 +57,41 @@ namespace InferenceEngine
             rowcount++;
 
             return;
+        }
+
+        public List<string[]> generatePostfixArrays(string[] hornkb)
+        {
+            List<string[]> postfixes = new List<string[]> { };
+
+            foreach (string sentence in hornkb)
+            {
+                if (sentence.Contains("=>") && sentence.Contains("&")) // contains both implication and conjunction
+                {
+                    // postfixes.Add(splitAtSymbol(sentence, new string[] { "&", "=>" }));
+                }
+                else if (sentence.Contains("=>") && !sentence.Contains("&")) // contains just an implication
+                {
+                    postfixes.Add(splitAtImplication(sentence));
+                }
+                else
+                {
+                    string[] tempsymbol = new string[] { sentence };
+                    postfixes.Add(tempsymbol); // just adds a single symbol in the form of an array to the list
+                }
+            }
+
+
+            return postfixes;
+        }
+
+        public string[] splitAtImplication(string target)
+        {
+            //gets all individual variables 
+            string[] delimiters = new string[] {"=>", " "};
+            string[] result = target.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+            result.Append("=>"); // ensures the symbol makes it into the postfix array
+
+            return result;
         }
     }
 }
