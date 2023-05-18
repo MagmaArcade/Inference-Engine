@@ -67,7 +67,9 @@ namespace InferenceEngine
             {
                 if (sentence.Contains("=>") && sentence.Contains("&")) // contains both implication and conjunction
                 {
-                    // postfixes.Add(splitAtSymbol(sentence, new string[] { "&", "=>" }));
+                    string[] splitimp = splitAtImplication(sentence);
+                    splitimp = splitAtConjunction(splitimp);
+                    postfixes.Add(splitimp);
                 }
                 else if (sentence.Contains("=>") && !sentence.Contains("&")) // contains just an implication
                 {
@@ -80,6 +82,7 @@ namespace InferenceEngine
                 }
             }
 
+            // printPostfixedSentences(postfixes); // function call to print to console for dev purposes
 
             return postfixes;
         }
@@ -89,9 +92,43 @@ namespace InferenceEngine
             //gets all individual variables 
             string[] delimiters = new string[] {"=>", " "};
             string[] result = target.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-            result.Append("=>"); // ensures the symbol makes it into the postfix array
+            result = result.Append("=>").ToArray(); // ensures the symbol makes it into the postfix array
 
             return result;
+        }
+
+        public string[] splitAtConjunction(string[] impsplit)
+        {   
+            string[] delimiters = new string[] { "&", " " };
+            string[] result = impsplit[0].Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+            result = result.Append("&").ToArray();
+
+            List<string> arrayAsList = impsplit.ToList(); // explicit conversion into list to allow for the remove/insert functions
+            arrayAsList.RemoveAt(0); // removes the old "symbol&symbol" split in the last function, in order to make room for the new, postfix version
+
+            for (int i = 2; i >= 0; i--)
+            {
+                arrayAsList.Insert(0, result[i]); // will add each element of the postfixed conjunction sentence to the front of the list (in reverse order as it always adds to the front)
+            }
+
+            string[] returnArray = arrayAsList.ToArray(); // explicit cast back into string[] to suit return value
+
+            return returnArray;
+        }
+
+        // the following code printed out postfixed versions of each sentence for development purposes
+        public void printPostfixedSentences(List<string[]> postfixSentences)
+        {
+            foreach (string[] i in postfixSentences)
+            {
+                foreach (string n in i)
+                {
+                    Console.Write(n);
+                    Console.Write(" ");
+                }
+
+                Console.WriteLine();
+            }
         }
     }
 }

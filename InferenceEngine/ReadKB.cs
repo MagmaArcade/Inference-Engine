@@ -98,6 +98,7 @@ namespace InferenceEngine
             {
                 Console.WriteLine(_propositionSymbol[i]);
             }
+            Console.WriteLine("---------------------------------");
         }
     }
 }
