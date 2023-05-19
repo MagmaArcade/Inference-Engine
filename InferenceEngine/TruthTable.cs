@@ -13,6 +13,7 @@ namespace InferenceEngine
         private string _query; // query string (goal state)
         private string[] _propositionSymbol;
         private int[,] _truthtable;
+        private int _rowcount; // making rowcount a field because backtracking/recursion keeps wiping my values
         private List<string[]> _postfixSentences; // list of arrays that contain kb sentences expressed in a postfix manner
         private int[,] _evaluatedPostfixSentences; // a 2D array of True/False values for each postfixed sentence
 
@@ -27,7 +28,8 @@ namespace InferenceEngine
                 int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
                 _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
 
-            generateBinaryStrings(_propositionSymbol.Length, _binaryStrings, 0, 0); // assigns actual values to _truthtable - cannot return int[,] because it is a recursively called method, it is acts as void and assigns to a class field
+            _rowcount = 0;
+            generateBinaryStrings(_propositionSymbol.Length, _binaryStrings, 0); // assigns actual values to _truthtable - cannot return int[,] because it is a recursively called method, it is acts as void and assigns to a class field
             
             _postfixSentences = generatePostfixArrays(_hornkb);
 
@@ -39,10 +41,7 @@ namespace InferenceEngine
         {
             int[,] evaluations = new int[postfixSentences.Count(), truthtable.GetLength(1)]; ; // will create a new array with columns = sentences & # rows = the # of models shown in the TT
 
-            for (int modelcount = 2047; modelcount < truthtable.GetLength(1); modelcount++) // a for loop to go through every single model in the truth table
-                //
-                // ATTENTION NICHOLAS - THIS HAS BEEN CHANGED TO 2047 FOR DEBUGGING - WHEN ITS NOT WORKING CHANGE IT BACK TO 0
-                //
+            for (int modelcount = 0; modelcount < truthtable.GetLength(1); modelcount++) // a for loop to go through every single model in the truth table
             {
                 foreach (string[] postfix in postfixSentences)
                 {
@@ -76,7 +75,6 @@ namespace InferenceEngine
                     // it is for every implication sentence in the list of postfixed sentences, but outside of the model increment (so still part of a loop)
 
                 }
-                modelcount++;
         }
 
             return evaluations;
@@ -100,7 +98,7 @@ namespace InferenceEngine
                 }
             }
 
-            // Console.WriteLine($"implication: {a} is at position {indexA}, {b} is at position {indexB}");
+            Console.WriteLine($"implication: {a} is at position {indexA}, {b} is at position {indexB}");
 
 
             return $"implication of {a} & {b}";
@@ -110,6 +108,7 @@ namespace InferenceEngine
         {
             int indexA = 0;
             int indexB = 0;
+            int result = 0;
 
             for (int i = 0; i < propSymbolsList.Length; i++) // gets the column value for the two symbols (used to look them up in the TT)
             {
@@ -124,36 +123,52 @@ namespace InferenceEngine
                 }
             }
 
-            // Console.WriteLine($"conjunction: {a} is at position {indexA}, {b} is at position {indexB}");
+            int modelvalueA = truthtable[indexA, count];
+            int modelvalueB = truthtable[indexB, count];
 
-            return $"(conjunction of {a} & {b})";
+            if (modelvalueA == modelvalueB)
+            {
+                result = 1;
+            }
+            else
+            {
+                result = 0;
+            }
+
+            Console.WriteLine($"the two symbols: {a}, {b}");
+            Console.WriteLine($"the two positions: {indexA}, {indexB}");
+            Console.WriteLine($"the two values in model {count}: {modelvalueA}, {modelvalueB}");
+            Console.WriteLine($"the resulting conjunction: {result}");
+            Console.WriteLine("--------------------------------------");
+            return result.ToString(); 
         }
 
-        public void generateBinaryStrings(int n, int[] bitarray, int arrpos, int rowcount) // credit for core backchannelling framework: https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/
+        public void generateBinaryStrings(int n, int[] bitarray, int arrpos) // credit for core backchannelling framework: https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/
         {
+
             if (arrpos == n)
             {
-                addToTruthTable(n, bitarray, rowcount);
+                addToTruthTable(n, bitarray);
                 return;
             }
 
             bitarray[arrpos] = 0;
-            generateBinaryStrings(n, bitarray, arrpos + 1, rowcount);
+            generateBinaryStrings(n, bitarray, arrpos + 1);
 
             bitarray[arrpos] = 1;
-            generateBinaryStrings(n, bitarray, arrpos + 1, rowcount);
+            generateBinaryStrings(n, bitarray, arrpos + 1);
         }
 
-        public void addToTruthTable(int n, int[] bitarray, int rowcount)
+        public void addToTruthTable(int n, int[] bitarray)
         {
             for (int i = 0; i < n; i++)
             {
-                _truthtable[i, rowcount] = bitarray[i];
-                // Console.Write(_truthtable[i, rowcount] + " "); // the two Console.Write statements were used in development to print out the truth table for each symbol
+                _truthtable[i, _rowcount] = bitarray[i];
+                Console.Write(_truthtable[i, _rowcount] + " "); // the two Console.Write statements were used in development to print out the truth table for each symbol
             }
-            // Console.WriteLine();
+            Console.WriteLine();
 
-            rowcount++;
+            _rowcount = _rowcount + 1;
 
             return;
         }
