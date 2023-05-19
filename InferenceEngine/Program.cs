@@ -17,22 +17,24 @@ namespace InferenceEngine
             fileread.PrintEnvironData();   // this is used to test the input data and data parse
 
 
-            Algorithms Algorithm = new Algorithms(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
-
             switch (args[0].ToLower())
             {
                 case "tt":
-                    Algorithm.TruthTable();
+                    TruthTable tt = new TruthTable(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
                     break;
+
                 case "fc":
-                    Console.WriteLine(Algorithm.ForwardChanneling());
+                    ForwardChannelling fc = new ForwardChannelling(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
                     break;
+
                 case "bc":
-                    Console.WriteLine(Algorithm.BackwardChanneling());
+                    BackwardChannelling bc = new BackwardChannelling(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
                     break;
+
                 default:
                     Console.WriteLine("No search method called " + args[0]);
                     break;
+
             }
 
             Console.ReadLine();

@@ -7,34 +7,95 @@ using System.Threading.Tasks;
 
 namespace InferenceEngine
 {
-    internal class TruthTable : Algorithms
+    internal class TruthTable
     {
-        private string[] _hornkb; // array of strings that contain horn clauses
-        private string _query; // query string (goal state)
-        private string[] _propositionSymbol;
         private int[,] _truthtable;
         private int _rowcount; // making rowcount a field because backtracking/recursion keeps wiping my values
         private List<string[]> _postfixSentences; // list of arrays that contain kb sentences expressed in a postfix manner
         private int[,] _evaluatedPostfixSentences; // a 2D array of True/False values for each postfixed sentence
+        private int[,] _evaluatedKnowledgeBase; // a 2D array storing conjoined sentence values + the value of the query for that model
 
 
-        public TruthTable(string[] HornKB, string Query, string[] PropositionSymbol) : base(HornKB, Query, PropositionSymbol)
+        public TruthTable(string[] hornKB, string query, string[] propositionSymbol)
         {
-            _hornkb = HornKB;
-            _query = Query;
-            _propositionSymbol = PropositionSymbol;
-
-                int numbits = _propositionSymbol.Length;
-                int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
-                _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
+            int numbits = propositionSymbol.Length;
+            int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
+            _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
 
             _rowcount = 0;
-            generateBinaryStrings(_propositionSymbol.Length, _binaryStrings, 0); // assigns actual values to _truthtable - cannot return int[,] because it is a recursively called method, it is acts as void and assigns to a class field
+            generateBinaryStrings(propositionSymbol.Length, _binaryStrings, 0); // assigns actual values to _truthtable - cannot return int[,] because it is a recursively called method, it is acts as void and assigns to a class field
             
-            _postfixSentences = generatePostfixArrays(_hornkb);
+            _postfixSentences = generatePostfixArrays(hornKB);
 
-            _evaluatedPostfixSentences = evaluatePostfixSentences(_postfixSentences, _truthtable, _propositionSymbol);
+            _evaluatedPostfixSentences = evaluatePostfixSentences(_postfixSentences, _truthtable, propositionSymbol);
 
+            _evaluatedKnowledgeBase = evaluateKnowledgeBase(_truthtable, _evaluatedPostfixSentences, query, propositionSymbol);
+
+            printResults(_evaluatedKnowledgeBase);
+        }
+
+        public int[,] evaluateKnowledgeBase(int[,] truthtable, int[,] sentencevalues, string query, string[] propSymbolsList)
+        {
+            int[,] conjoinedKB = new int[2, sentencevalues.GetLength(1)]; // creates an array with two columns - one to carry the conjoined sentences and one to carry the query in that model
+
+            // Grab the index for the query
+            int queryIndex = -1;
+
+            for (int i = 0; i < propSymbolsList.Length; i++) // gets the column value for the two symbols (used to look them up in the TT)
+            {
+                if (propSymbolsList[i] == query)
+                {
+                    queryIndex = i;
+                }
+            }
+
+            // Begin iterating through the KB models
+            for (int i = 0; i < sentencevalues.GetLength(1); i++)
+            {
+                int modelvalue = sentencevalues[0, i];
+
+                for (int j = 1; j < sentencevalues.GetLength(0); j++)
+                {
+                    modelvalue = modelvalue & sentencevalues[j, i];
+                }
+
+                conjoinedKB[0, i] = modelvalue;
+                
+                    // Small block of code to catch edge case where a query is asked that doesn't exist in the list
+                    try
+                    {
+                        int testQuery = truthtable[queryIndex, i];
+                    }
+                    catch
+                    {
+                        break;
+                    }
+
+                conjoinedKB[1, i] = truthtable[queryIndex, i];
+            }
+            return conjoinedKB;
+        }
+
+        public void printResults(int[,] kb)
+        {
+            List<int> doesEntail = new List<int>();
+
+            for(int i = 0; i < kb.GetLength(1); i++)
+            {
+                if (kb[0, i] == 1 && kb[1, i] == 1)
+                {
+                    doesEntail.Add(i);
+                }
+            }
+
+            if (doesEntail.Count > 0)
+            {
+                Console.WriteLine("YES: {0}", doesEntail.Count());
+            }
+            else
+            {
+                Console.WriteLine("NO");
+            }
         }
 
         public int[,] evaluatePostfixSentences(List<string[]> postfixSentences, int[,] truthtable, string[] propSymbols) // Great overview of postfix expressions and how to evaluate them using a stack: https://www2.cs.sfu.ca/CourseCentral/125/tjd/postfix.html
@@ -50,6 +111,8 @@ namespace InferenceEngine
                     if (postfixSentences[sentencecount].Length == 1)    // introduce the edge case for if the 'sentence' is simply a symbol
                     {
                         evaluations[sentencecount, modelcount] = 1;     // we can always just assume that a single symbol = true in Horn notation
+                        // Console.Write($"1 ");
+
                     }
                     else
                     {
@@ -60,27 +123,28 @@ namespace InferenceEngine
                                 string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
                                 string a = symbolstack.Pop();
                                 symbolstack.Push(evaluateImplication(truthtable, a, b, modelcount, propSymbols));
-                                // Console.WriteLine(symbolstack.Peek());
                             }
                             else if (postfixSentences[sentencecount][i] == "&") // conjunction symbol
                             {
                                 string b = symbolstack.Pop();
                                 string a = symbolstack.Pop();
                                 symbolstack.Push(evaluateConjunction(truthtable, a, b, modelcount, propSymbols));
-                                // Console.WriteLine(symbolstack.Peek());
                             }
                             else
                             {
                                 symbolstack.Push(postfixSentences[sentencecount][i]); // propositional symbols
-                                                                                      // Console.WriteLine($"pushed {postfix[i]} onto the stack");
                             }
                         }
 
                         string stacktop = symbolstack.Pop();
                         int evaluationresult = Int32.Parse(stacktop);
                         evaluations[sentencecount, modelcount] = evaluationresult;
+
+                        // Console.Write($"{evaluationresult} ");
                     }
                 }
+                // Console.WriteLine();
+
             }
 
             return evaluations;
