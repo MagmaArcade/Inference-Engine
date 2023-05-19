@@ -47,62 +47,41 @@ namespace InferenceEngine
                 {
                     Stack<string> symbolstack = new Stack<string>(); // the stack used to evaluate each postfix array
 
-                    for (int i = 0; i < postfixSentences[sentencecount].Length; i++)
+                    if (postfixSentences[sentencecount].Length == 1)    // introduce the edge case for if the 'sentence' is simply a symbol
                     {
-                        if (postfixSentences[sentencecount][i] == "=>") // implication symbol
-                        {
-                            string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
-                            string a = symbolstack.Pop();
-                            symbolstack.Push(evaluateImplication(truthtable, a, b, modelcount, propSymbols));
-                            // Console.WriteLine(symbolstack.Peek());
-                        }
-                        else if (postfixSentences[sentencecount][i] == "&") // conjunction symbol
-                        {
-                            string b = symbolstack.Pop();
-                            string a = symbolstack.Pop();
-                            symbolstack.Push(evaluateConjunction(truthtable, a, b, modelcount, propSymbols));
-                            // Console.WriteLine(symbolstack.Peek());
-                        }
-                        else
-                        {
-                            symbolstack.Push(postfixSentences[sentencecount][i]); // propositional symbols
-                            // Console.WriteLine($"pushed {postfix[i]} onto the stack");
-                        }
+                        evaluations[sentencecount, modelcount] = 1;     // we can always just assume that a single symbol = true in Horn notation
                     }
-                /*foreach (string[] postfix in postfixSentences)
-                {
-                    Stack<string> symbolstack = new Stack<string>(); // the stack used to evaluate each postfix array
-
-                    for (int i = 0; i < postfix.Length; i++)
+                    else
                     {
-                        if (postfix[i] == "=>") // implication symbol
+                        for (int i = 0; i < postfixSentences[sentencecount].Length; i++)
                         {
-                            string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
-                            string a = symbolstack.Pop();
-                            symbolstack.Push(evaluateImplication(truthtable, a, b, modelcount, propSymbols));
-                            // Console.WriteLine(symbolstack.Peek());
+                            if (postfixSentences[sentencecount][i] == "=>") // implication symbol
+                            {
+                                string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
+                                string a = symbolstack.Pop();
+                                symbolstack.Push(evaluateImplication(truthtable, a, b, modelcount, propSymbols));
+                                // Console.WriteLine(symbolstack.Peek());
+                            }
+                            else if (postfixSentences[sentencecount][i] == "&") // conjunction symbol
+                            {
+                                string b = symbolstack.Pop();
+                                string a = symbolstack.Pop();
+                                symbolstack.Push(evaluateConjunction(truthtable, a, b, modelcount, propSymbols));
+                                // Console.WriteLine(symbolstack.Peek());
+                            }
+                            else
+                            {
+                                symbolstack.Push(postfixSentences[sentencecount][i]); // propositional symbols
+                                                                                      // Console.WriteLine($"pushed {postfix[i]} onto the stack");
+                            }
                         }
-                        else if (postfix[i] == "&") // conjunction symbol
-                        {
-                            string b = symbolstack.Pop();
-                            string a = symbolstack.Pop();
-                            symbolstack.Push(evaluateConjunction(truthtable, a, b, modelcount, propSymbols));
-                            // Console.WriteLine(symbolstack.Peek());
-                        }
-                        else
-                        {
-                            symbolstack.Push(postfix[i]); // propositional symbols
-                            // Console.WriteLine($"pushed {postfix[i]} onto the stack");
-                        }
-                    }*/
 
-                    string stacktop = symbolstack.Pop();
-                    Console.WriteLine(stacktop);
-                    int evaluationresult = Int32.Parse(stacktop);
-                    evaluations[sentencecount, modelcount] = evaluationresult;
-
+                        string stacktop = symbolstack.Pop();
+                        int evaluationresult = Int32.Parse(stacktop);
+                        evaluations[sentencecount, modelcount] = evaluationresult;
+                    }
                 }
-        }
+            }
 
             return evaluations;
         }
@@ -263,7 +242,7 @@ namespace InferenceEngine
                 }
             }
 
-            printPostfixedSentences(postfixes); // function call to print to console for dev purposes
+            // printPostfixedSentences(postfixes); // function call to print to console for dev purposes
 
             return postfixes;
         }
