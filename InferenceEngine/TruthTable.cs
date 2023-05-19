@@ -43,7 +43,33 @@ namespace InferenceEngine
 
             for (int modelcount = 0; modelcount < truthtable.GetLength(1); modelcount++) // a for loop to go through every single model in the truth table
             {
-                foreach (string[] postfix in postfixSentences)
+                for (int sentencecount = 0; sentencecount < postfixSentences.Count(); sentencecount++)
+                {
+                    Stack<string> symbolstack = new Stack<string>(); // the stack used to evaluate each postfix array
+
+                    for (int i = 0; i < postfixSentences[sentencecount].Length; i++)
+                    {
+                        if (postfixSentences[sentencecount][i] == "=>") // implication symbol
+                        {
+                            string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
+                            string a = symbolstack.Pop();
+                            symbolstack.Push(evaluateImplication(truthtable, a, b, modelcount, propSymbols));
+                            // Console.WriteLine(symbolstack.Peek());
+                        }
+                        else if (postfixSentences[sentencecount][i] == "&") // conjunction symbol
+                        {
+                            string b = symbolstack.Pop();
+                            string a = symbolstack.Pop();
+                            symbolstack.Push(evaluateConjunction(truthtable, a, b, modelcount, propSymbols));
+                            // Console.WriteLine(symbolstack.Peek());
+                        }
+                        else
+                        {
+                            symbolstack.Push(postfixSentences[sentencecount][i]); // propositional symbols
+                            // Console.WriteLine($"pushed {postfix[i]} onto the stack");
+                        }
+                    }
+                /*foreach (string[] postfix in postfixSentences)
                 {
                     Stack<string> symbolstack = new Stack<string>(); // the stack used to evaluate each postfix array
 
@@ -58,7 +84,7 @@ namespace InferenceEngine
                         }
                         else if (postfix[i] == "&") // conjunction symbol
                         {
-                            string b = symbolstack.Pop(); // order of the letters here is important - b is popped first but it has to be treated as the second symbol in the array
+                            string b = symbolstack.Pop();
                             string a = symbolstack.Pop();
                             symbolstack.Push(evaluateConjunction(truthtable, a, b, modelcount, propSymbols));
                             // Console.WriteLine(symbolstack.Peek());
@@ -68,11 +94,12 @@ namespace InferenceEngine
                             symbolstack.Push(postfix[i]); // propositional symbols
                             // Console.WriteLine($"pushed {postfix[i]} onto the stack");
                         }
-                    }
+                    }*/
 
-                    // is here where we lift the top number off the stack and assign it accordingly to it's proper sentence and proper model in the evaluations 2D array
-                    // WILL HAVE TO CONVERT STRING TO INT
-                    // it is for every implication sentence in the list of postfixed sentences, but outside of the model increment (so still part of a loop)
+                    string stacktop = symbolstack.Pop();
+                    Console.WriteLine(stacktop);
+                    int evaluationresult = Int32.Parse(stacktop);
+                    evaluations[sentencecount, modelcount] = evaluationresult;
 
                 }
         }
@@ -80,35 +107,10 @@ namespace InferenceEngine
             return evaluations;
         }
 
-        public string evaluateImplication(int[,] truthtable, string a, string b, int count, string[] propSymbolsList)
-        {
-            int indexA = 0;
-            int indexB = 0;
-
-            for(int i = 0; i < propSymbolsList.Length; i++) // gets the column value for the two symbols (used to look them up in the TT)
-            {
-                if (propSymbolsList[i] == a)
-                {
-                    indexA = i;
-                }
-
-                if (propSymbolsList[i] == b)
-                {
-                    indexB = i;
-                }
-            }
-
-            Console.WriteLine($"implication: {a} is at position {indexA}, {b} is at position {indexB}");
-
-
-            return $"implication of {a} & {b}";
-        }
-
         public string evaluateConjunction(int[,] truthtable, string a, string b, int count, string[] propSymbolsList)
         {
             int indexA = 0;
             int indexB = 0;
-            int result = 0;
 
             for (int i = 0; i < propSymbolsList.Length; i++) // gets the column value for the two symbols (used to look them up in the TT)
             {
@@ -123,24 +125,89 @@ namespace InferenceEngine
                 }
             }
 
-            int modelvalueA = truthtable[indexA, count];
-            int modelvalueB = truthtable[indexB, count];
+            int result = truthtable[indexA, count] & truthtable[indexB, count];
 
-            if (modelvalueA == modelvalueB)
+                // Writing values to console for dev purposes
+                /*Console.WriteLine($"the two symbols: {a}, {b}");
+                Console.WriteLine($"the two positions: {indexA}, {indexB}");
+                Console.WriteLine($"the values in model {count}");
+                Console.WriteLine($"the resulting conjunction: {result}");
+                Console.WriteLine("--------------------------------------");*/
+
+            return result.ToString();
+        }
+
+        public string evaluateImplication(int[,] truthtable, string a, string b, int count, string[] propSymbolsList)
+        {
+            if (a == "0" | a == "1") // identifies if a conjunction has already been evaluated, as this needs to be processed differently
             {
-                result = 1;
+                return evaluateImpAfterConj(truthtable, a, b, count, propSymbolsList);
             }
             else
             {
-                result = 0;
+                int indexA = 0;
+                int indexB = 0;
+
+                for (int i = 0; i < propSymbolsList.Length; i++) // gets the column value for the two symbols (used to look them up in the TT)
+                {
+                    if (propSymbolsList[i] == a)
+                    {
+                        indexA = i;
+                    }
+
+                    if (propSymbolsList[i] == b)
+                    {
+                        indexB = i;
+                    }
+                }
+
+                // Begin implication elimination
+                int modelA = truthtable[indexA, count];
+
+                // Negation of alpha
+                if (modelA == 0)
+                {
+                    modelA = 1;
+                }
+                else
+                {
+                    modelA = 0;
+                }
+
+                int result = modelA | truthtable[indexB, count];
+
+                return result.ToString();
+            }
+        }
+
+        public string evaluateImpAfterConj(int[,] truthtable, string a, string b, int count, string[] propSymbolsList)
+        {
+            int indexB = 0; // only need a value for B, we already have A as True/False
+
+            for (int i = 0; i < propSymbolsList.Length; i++) // gets the column value for the two symbols (used to look them up in the TT)
+            {
+                if (propSymbolsList[i] == b)
+                {
+                    indexB = i;
+                }
             }
 
-            Console.WriteLine($"the two symbols: {a}, {b}");
-            Console.WriteLine($"the two positions: {indexA}, {indexB}");
-            Console.WriteLine($"the two values in model {count}: {modelvalueA}, {modelvalueB}");
-            Console.WriteLine($"the resulting conjunction: {result}");
-            Console.WriteLine("--------------------------------------");
-            return result.ToString(); 
+            // Begin implication elimination
+            int modelA = Int32.Parse(a); // takes the string result of the evaluated conjunction and runs an impliccation through it
+
+            // Negation of alpha
+            if (modelA == 0)
+            {
+                modelA = 1;
+            }
+            else
+            {
+                modelA = 0;
+            }
+
+            int result = modelA | truthtable[indexB, count];
+
+            return result.ToString();
         }
 
         public void generateBinaryStrings(int n, int[] bitarray, int arrpos) // credit for core backchannelling framework: https://www.geeksforgeeks.org/generate-all-the-binary-strings-of-n-bits/
@@ -164,9 +231,9 @@ namespace InferenceEngine
             for (int i = 0; i < n; i++)
             {
                 _truthtable[i, _rowcount] = bitarray[i];
-                Console.Write(_truthtable[i, _rowcount] + " "); // the two Console.Write statements were used in development to print out the truth table for each symbol
+                // Console.Write(_truthtable[i, _rowcount] + " "); // the two Console.Write statements were used in development to print out the truth table for each symbol
             }
-            Console.WriteLine();
+            // Console.WriteLine();
 
             _rowcount = _rowcount + 1;
 
