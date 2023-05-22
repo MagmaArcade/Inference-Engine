@@ -6,10 +6,10 @@ namespace InferenceEngine
 {
     class BackwardChaining
     {
-        private string[] _hornKB;
-        private string _query;
-        private string[] _propositionSymbol;
-        private List<string> _path;
+        private string[] _hornKB;            // Holds the Horn clauses
+        private string _query;               // Represents the goal state to be proven
+        private string[] _propositionSymbol; // Contains the proposition symbols
+        private List<string> _path;          // Stores the path taken to prove the goal state
 
         public BackwardChaining(string[] HornKB, string Query, string[] PropositionSymbol)
         {
@@ -18,20 +18,20 @@ namespace InferenceEngine
             _propositionSymbol = PropositionSymbol;
             _path = new List<string>();
 
-            printResults();
+            printResults(); // Calls the method to perform backward chaining and print the results
         }
 
         public void printResults()
         {
-            bool result = PL_BC_Entails(_query);
+            bool result = PL_BC_Entails(_query); // Calls the backward chaining algorithm
             if (result)
             {
-                _path.Reverse();
-                Console.WriteLine("YES: " + string.Join(", ", _path));
+                _path.Reverse(); // Reverses the path to get the correct order
+                Console.WriteLine("YES: " + string.Join(", ", _path)); // Prints the path taken to prove the goal state
             }
             else
             {
-                Console.WriteLine("NO");
+                Console.WriteLine("NO"); // Prints NO if the goal state cannot be proven
             }
         }
 
@@ -39,14 +39,14 @@ namespace InferenceEngine
         {
             if (!_propositionSymbol.Contains(query))
             {
-                Console.WriteLine("Invalid query!");
+                Console.WriteLine("Invalid query!"); // Prints an error message if the query is not a valid proposition symbol
                 return false;
             }
 
             if (_hornKB.Contains(query))
             {
-                _path.Add(query);
-                return true;
+                _path.Add(query); // Adds the goal state to the path
+                return true;      // Returns true if the goal state is already in the Horn clauses
             }
 
             foreach (string rule in _hornKB)
@@ -64,20 +64,20 @@ namespace InferenceEngine
                     {
                         if (!PL_BC_Entails(symbol))
                         {
-                            result = false;
+                            result = false; // Returns false if any premise symbol cannot be proven
                             break;
                         }
                     }
 
                     if (result)
                     {
-                        _path.Insert(0, query);
-                        return true;
+                        _path.Insert(0, query); // Inserts the goal state at the beginning of the path
+                        return true;            // Returns true if the goal state can be proven based on the premises
                     }
                 }
             }
 
-            return false;
+            return false; // Returns false if the goal state cannot be proven
         }
     }
 }
