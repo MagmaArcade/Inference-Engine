@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace InferenceEngine
 {
-    internal class BackwardChannelling
+    class ForwardChaining
     {
-        public BackwardChannelling(string[] HornKB, string Query, string[] PropositionSymbol)
+        public ForwardChaining(string[] HornKB, string Query, string[] PropositionSymbol)
         {
 
         }

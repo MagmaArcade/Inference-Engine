@@ -43,8 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackwardChannelling.cs" />
-    <Compile Include="ForwardChannelling.cs" />
+    <Compile Include="BackwardChaining.cs" />
+    <Compile Include="ForwardChaining.cs" />
     <Compile Include="TruthTable.cs" />
     <Compile Include="ReadKB.cs" />
     <Compile Include="Program.cs" />
