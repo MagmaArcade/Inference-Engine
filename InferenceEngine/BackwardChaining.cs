@@ -23,10 +23,9 @@ namespace InferenceEngine
 
         public void printResults()
         {
-            bool result = PL_BC_Entails(_query); // Calls the backward chaining algorithm
+            bool result = BackwardChainingAlg(_query); // Calls the backward chaining algorithm
             if (result)
             {
-                _path.Reverse(); // Reverses the path to get the correct order
                 Console.WriteLine("YES: " + string.Join(", ", _path)); // Prints the path taken to prove the goal state
             }
             else
@@ -35,7 +34,7 @@ namespace InferenceEngine
             }
         }
 
-        private bool PL_BC_Entails(string query)
+        private bool BackwardChainingAlg(string query)
         {
             if (!_propositionSymbol.Contains(query))
             {
@@ -62,7 +61,7 @@ namespace InferenceEngine
 
                     foreach (string symbol in premises)
                     {
-                        if (!PL_BC_Entails(symbol))
+                        if (!BackwardChainingAlg(symbol))
                         {
                             result = false; // Returns false if any premise symbol cannot be proven
                             break;
@@ -71,7 +70,7 @@ namespace InferenceEngine
 
                     if (result)
                     {
-                        _path.Insert(0, query); // Inserts the goal state at the beginning of the path
+                        _path.Add(query); // Inserts the goal state at the beginning of the path
                         return true;            // Returns true if the goal state can be proven based on the premises
                     }
                 }
