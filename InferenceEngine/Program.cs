@@ -14,7 +14,8 @@ namespace InferenceEngine
 
             fileread.ParseHornKB();     // this is used to parse the raw data 
 
-            fileread.PrintEnvironData();   // this is used to test the input data and data parse
+            // DEBUGGING
+                   //fileread.PrintEnvironData();   // this is used to test the input data and data parse
 
 
             switch (args[0].ToLower())
@@ -24,11 +25,11 @@ namespace InferenceEngine
                     break;
 
                 case "fc":
-                    ForwardChannelling fc = new ForwardChannelling(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
+                    ForwardChaining fc = new ForwardChaining(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
                     break;
 
                 case "bc":
-                    BackwardChannelling bc = new BackwardChannelling(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
+                    BackwardChaining bc = new BackwardChaining(fileread.HornKB, fileread.Query, fileread.PropositionSymbol);
                     break;
 
                 default:
