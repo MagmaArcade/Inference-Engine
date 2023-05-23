@@ -14,11 +14,11 @@ namespace InferenceEngine
         private List<string[]> _postfixSentences; // list of arrays that contain kb sentences expressed in a postfix manner
         private int[,] _evaluatedPostfixSentences; // a 2D array of True/False values for each postfixed sentence
         private int[,] _evaluatedKnowledgeBase; // a 2D array storing conjoined sentence values + the value of the query for that model
-
+        private string _errMsg;
 
         public TruthTable(string[] hornKB, string query, string[] propositionSymbol)
         {
-            evint numbits = propositionSymbol.Length;
+            int numbits = propositionSymbol.Length;
             int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
             _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
 
@@ -71,6 +71,7 @@ namespace InferenceEngine
                     }
                     catch
                     {
+                        _errMsg = ("Invalid query!");
                         break;
                     }
 
@@ -99,6 +100,7 @@ namespace InferenceEngine
                 if (kb[0, i] == 1 && kb[1, i] == 0)
                 {
                     doesEntail.Clear();
+                    _errMsg = "No solution!";
                 }
             }
 
@@ -109,6 +111,7 @@ namespace InferenceEngine
             else
             {
                 Console.WriteLine("NO");
+                // Console.WriteLine(_errMsg);  Gives more information on the error, had to be removed for batch testing requirements!
             }
         }
 

@@ -18,8 +18,6 @@ namespace InferenceEngine
         private string[] _propositionSymbol;
         private bool validAsk = false, validTell = false;
 
-
-
         // Read Only Properties 
         public string[] HornKB{
             get { return _hornkb; }}
@@ -27,7 +25,6 @@ namespace InferenceEngine
             get { return _query; }}
         public string[] PropositionSymbol{
             get { return _propositionSymbol; }}
-
 
         // read in the raw data
         public ReadKB (string testfile)
@@ -49,14 +46,14 @@ namespace InferenceEngine
 
 
         //parse the raw data
-        public void ParseHornKB()
+        public bool ParseHornKB() // boolean function as it will return false if something has gone wrong with the file read (AKA ASK/TELL is not formatted correctly)
         {
 
             for (int i = 0; i < _rawdata.Count; i++)
             {
                 if (_rawdata[i].Trim() == "TELL")
                 {
-                    validTell = false;
+                    validTell = true;
                     _hornkb = _rawdata[i + 1].Split(';');
 
                     //gets all individual variables 
@@ -72,15 +69,12 @@ namespace InferenceEngine
                     validAsk = true;
                     _query = _rawdata[i + 1];
                 }
-
-                
             }
 
-            
-            if (DataValidation())
-            { 
+            if(DataValidation())
+            {
                 _hornkb = _hornkb.Take(_hornkb.Length - 1).ToArray(); // remove the last (blank) element from the array
-            
+
                 for (int i = 0; i < _hornkb.Count(); i++) // remove whitespace from every query (ease of use later)
                 {
                     string initial = _hornkb[i];
@@ -88,19 +82,19 @@ namespace InferenceEngine
                     _hornkb[i] = initial;
                 }
             }
+
+            return DataValidation();
         }
 
 
         public bool DataValidation()
         {
-            if (validTell == false) // if Tell of ask is not in the file print error end loop
+            if (validTell == false) // if tell is not in the file print error end loop
             {
-                Console.WriteLine("NO: Fail File Read");
                 return false;
             }
-            if (validAsk == false) // if Tell of ask is not in the file print error end loop
+            if (validAsk == false) // if ask is not in the file print error end loop
             {
-                Console.WriteLine("NO: Fail File Read");
                 return false;
             }
             return true;
