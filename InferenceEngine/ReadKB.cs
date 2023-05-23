@@ -16,6 +16,8 @@ namespace InferenceEngine
         private string[] _hornkb; // array of strings that contain horn clauses
         private string _query; // query string (goal state)
         private string[] _propositionSymbol;
+        private bool validAsk = false, validTell = false;
+
 
 
         // Read Only Properties 
@@ -49,10 +51,12 @@ namespace InferenceEngine
         //parse the raw data
         public void ParseHornKB()
         {
+
             for (int i = 0; i < _rawdata.Count; i++)
             {
                 if (_rawdata[i].Trim() == "TELL")
                 {
+                    validTell = false;
                     _hornkb = _rawdata[i + 1].Split(';');
 
                     //gets all individual variables 
@@ -65,25 +69,41 @@ namespace InferenceEngine
  
                 if (_rawdata[i].Trim() == "ASK")
                 {
+                    validAsk = true;
                     _query = _rawdata[i + 1];
                 }
 
-              /*  if (_rawdata[i].Trim() != "TELL" && _rawdata[i+2].Trim() != "ASK") // if Tell of ask is not in the file print error end loop
-                {
-                    Console.WriteLine("Issue With Reading File, Please Ensure TELL and ASK are correctly Implemented");
-
-                } */
+                
             }
 
-            _hornkb = _hornkb.Take(_hornkb.Length - 1).ToArray(); // remove the last (blank) element from the array
             
-            for (int i = 0; i < _hornkb.Count(); i++) // remove whitespace from every query (ease of use later)
-            {
-                string initial = _hornkb[i];
-                initial = Regex.Replace(initial, @"\s", "");
-                _hornkb[i] = initial;
+            if (DataValidation())
+            { 
+                _hornkb = _hornkb.Take(_hornkb.Length - 1).ToArray(); // remove the last (blank) element from the array
+            
+                for (int i = 0; i < _hornkb.Count(); i++) // remove whitespace from every query (ease of use later)
+                {
+                    string initial = _hornkb[i];
+                    initial = Regex.Replace(initial, @"\s", "");
+                    _hornkb[i] = initial;
+                }
             }
+        }
 
+
+        public bool DataValidation()
+        {
+            if (validTell == false) // if Tell of ask is not in the file print error end loop
+            {
+                Console.WriteLine("NO: Fail File Read");
+                return false;
+            }
+            if (validAsk == false) // if Tell of ask is not in the file print error end loop
+            {
+                Console.WriteLine("NO: Fail File Read");
+                return false;
+            }
+            return true;
         }
 
 
