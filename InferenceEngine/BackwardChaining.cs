@@ -9,14 +9,14 @@ namespace InferenceEngine
         private string[] _hornKB;            // Holds the Horn clauses
         private string _query;               // Represents the goal state to be proven
         private string[] _propositionSymbol; // Contains the proposition symbols
-        private List<string> _path;          // Stores the path taken to prove the goal state
+        private List<string> _inferredSymbols;          // Stores the path taken to prove the goal state
 
         public BackwardChaining(string[] HornKB, string Query, string[] PropositionSymbol)
         {
             _hornKB = HornKB;
             _query = Query;
             _propositionSymbol = PropositionSymbol;
-            _path = new List<string>();
+            _inferredSymbols = new List<string>();
 
             printResults(); // Calls the method to perform backward chaining and print the results
         }
@@ -26,7 +26,7 @@ namespace InferenceEngine
             bool result = backwardChainingAlg(_query); // Calls the backward chaining algorithm
             if (result)
             {
-                Console.WriteLine("YES: " + string.Join(", ", _path)); // Prints the path taken to prove the goal state
+                Console.WriteLine("YES: " + string.Join(", ", _inferredSymbols)); // Prints the path taken to prove the goal state
             }
             else
             {
@@ -44,7 +44,7 @@ namespace InferenceEngine
 
             if (_hornKB.Contains(query))
             {
-                _path.Add(query); // Adds the goal state to the path
+                _inferredSymbols.Add(query); // Adds the goal state to the path
                 return true;      // Returns true if the goal state is already in the Horn clauses
             }
 
@@ -70,7 +70,7 @@ namespace InferenceEngine
 
                     if (result)
                     {
-                        _path.Add(query); // Inserts the goal state at the beginning of the path
+                        _inferredSymbols.Add(query); // Inserts the goal state at the beginning of the path
                         return true;            // Returns true if the goal state can be proven based on the premises
                     }
                 }

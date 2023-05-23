@@ -48,54 +48,50 @@ namespace InferenceEngine
                 return true;      // Returns true if the goal state is already in the Horn clauses
             }
 
-            foreach (string symbol in _propositionSymbol)
-            {
+            foreach(string symbol in _propositionSymbol)
+{
                 foreach (string rule in _hornKB)
                 {
                     string[] implication = rule.Split(new string[] { "=>" }, StringSplitOptions.RemoveEmptyEntries);
                     string premise = implication[0];
-                    string conclusion = "";
-                    string[] conclusions;
 
-                    if (premise == query)
+                    if (implication.Length == 1)
                     {
-                        if (implication.Count() == 1)
-                        {
-                            _inferredSymbols.Add(premise); // Adds the premise to the inferred symbols
-                                                           // as if it is a Proposition Symbol without any conclusion it is true
-                        }
-                        else if (implication.Count() >= 2)
-                        {
-                            conclusion = implication[1];
+                        _inferredSymbols.Add(premise); // Adds the premise to the inferred symbols
+                                                       // as if it is a Proposition Symbol without any conclusion, it is true
+                    }
+                    else if (implication.Length == 2)
+                    {
+                        string conclusion = implication[1];
 
-                            if (_inferredSymbols.Contains(premise))
+                        if (premise.Contains("&"))
+                        {
+                            string[] premises = premise.Split('&');
+
+                            bool allPremisesInferred = premises.All(p => _inferredSymbols.Contains(p.Trim()));
+                            if (allPremisesInferred)
                             {
-                                conclusions = conclusion.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
-                                foreach (string s in conclusions)
-                                {
-                                    _inferredSymbols.Add(s); // Adds the conclusion to the inferred symbols
-                                }
-                            }
-                            else
-                            {
-                                continue; // Skips to the next iteration if the premise is not found in the inferred symbols
+                                _inferredSymbols.Add(conclusion); // Adds the conclusion to the inferred symbols
                             }
                         }
-
-
-                        foreach (string s in _inferredSymbols)
+                        else if (_inferredSymbols.Contains(premise))
                         {
-                            if (s == _query)
-                            {
-                                //_inferredSymbols.Insert(0, query); // Inserts the goal state at the beginning of the path
-                                return true;            // Returns true if the goal state can be proven based on the premises
-                            }
+                            _inferredSymbols.Add(conclusion); // Adds the conclusion to the inferred symbols
                         }
 
-                       
+
+                        foreach (string inferredSymbol in _inferredSymbols)
+                        {
+                            if (inferredSymbol == _query)
+                            {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
+
+
 
             return false; // Returns false if the goal state cannot be proven
         }
