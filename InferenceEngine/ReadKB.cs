@@ -51,7 +51,7 @@ namespace InferenceEngine
         {
             for (int i = 0; i < _rawdata.Count; i++)
             {
-                if (_rawdata[i] == "TELL")
+                if (_rawdata[i].Trim() == "TELL")
                 {
                     _hornkb = _rawdata[i + 1].Split(';');
 
@@ -63,10 +63,16 @@ namespace InferenceEngine
                     _propositionSymbol = _temp.Distinct().ToArray();
                 }
  
-                if (_rawdata[i] == "ASK")
+                if (_rawdata[i].Trim() == "ASK")
                 {
                     _query = _rawdata[i + 1];
                 }
+
+              /*  if (_rawdata[i].Trim() != "TELL" && _rawdata[i+2].Trim() != "ASK") // if Tell of ask is not in the file print error end loop
+                {
+                    Console.WriteLine("Issue With Reading File, Please Ensure TELL and ASK are correctly Implemented");
+
+                } */
             }
 
             _hornkb = _hornkb.Take(_hornkb.Length - 1).ToArray(); // remove the last (blank) element from the array

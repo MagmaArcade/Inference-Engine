@@ -7,7 +7,7 @@ namespace InferenceEngine
     class ForwardChaining
     {
         private string[] _hornKB;             // Holds the Horn clauses
-        private string _query;                // Represents the goal state to be proven
+        private string _query, errMsg;                // Represents the goal state to be proven
         private string[] _propositionSymbol;  // Contains the proposition symbols
         private List<string> _inferredSymbols; // Stores the path taken to prove the goal state
 
@@ -30,7 +30,7 @@ namespace InferenceEngine
             }
             else
             {
-                Console.WriteLine("NO"); // Prints NO if the goal state cannot be proven
+                Console.WriteLine("NO: " + errMsg); // Prints NO if the goal state cannot be proven
             }
         }
 
@@ -38,7 +38,7 @@ namespace InferenceEngine
         {
             if (!_propositionSymbol.Contains(query))
             {
-                Console.WriteLine("Invalid query!"); // Prints an error message if the query is not a valid proposition symbol
+                errMsg = "Invalid Query!"; // Prints an error message if the query is not a valid proposition symbol
                 return false;
             }
 
@@ -55,7 +55,7 @@ namespace InferenceEngine
                     string[] implication = rule.Split(new string[] { "=>" }, StringSplitOptions.RemoveEmptyEntries);
                     string premise = implication[0];
 
-                    if (implication.Length == 1)
+                    if (implication.Length == 1) // atomic propositions
                     {
                         _inferredSymbols.Add(premise); // Adds the premise to the inferred symbols
                                                        // as if it is a Proposition Symbol without any conclusion, it is true
@@ -92,7 +92,7 @@ namespace InferenceEngine
             }
 
 
-
+            errMsg = "NO Soloution";
             return false; // Returns false if the goal state cannot be proven
         }
     }
