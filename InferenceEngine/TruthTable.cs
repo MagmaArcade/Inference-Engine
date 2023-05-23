@@ -61,6 +61,9 @@ namespace InferenceEngine
 
                 conjoinedKB[0, i] = modelvalue;
                 
+                // Console.Write(conjoinedKB[0, i].ToString());
+                // Console.Write(" ");
+                
                     // Small block of code to catch edge case where a query is asked that doesn't exist in the list
                     try
                     {
@@ -72,6 +75,9 @@ namespace InferenceEngine
                     }
 
                 conjoinedKB[1, i] = truthtable[queryIndex, i];
+                
+                // Console.Write(conjoinedKB[1, i].ToString());
+                // Console.WriteLine();
             }
             return conjoinedKB;
         }
@@ -110,7 +116,18 @@ namespace InferenceEngine
 
                     if (postfixSentences[sentencecount].Length == 1)    // introduce the edge case for if the 'sentence' is simply a symbol
                     {
-                        evaluations[sentencecount, modelcount] = 1;     // we can always just assume that a single symbol = true in Horn notation
+                        string symbol = postfixSentences[sentencecount][0];
+                        int symbolIndex = 0; 
+
+                        for (int i = 0; i < propSymbols.Length; i++) // Need to first find the symbols position in the TT array
+                        {
+                            if (propSymbols[i] == symbol)
+                            {
+                                symbolIndex = i;
+                            }
+                        }
+
+                        evaluations[sentencecount, modelcount] = truthtable[symbolIndex, modelcount]; // associate that symbols T/F in the model with corresponding value
                         // Console.Write($"1 ");
 
                     }

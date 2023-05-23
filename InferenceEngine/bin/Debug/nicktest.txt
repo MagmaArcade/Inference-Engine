@@ -1,4 +1,4 @@
 TELL
-p2=> p3; p3 => a;
+p2=> p3; p3 => a; p3;
 ASK
-d
+a
