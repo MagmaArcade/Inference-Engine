@@ -86,11 +86,19 @@ namespace InferenceEngine
         {
             List<int> doesEntail = new List<int>();
 
-            for(int i = 0; i < kb.GetLength(1); i++)
+            for (int i = 0; i < kb.GetLength(1); i++) // if every value whre the KB is true, query is also true, then add 1 to the list
             {
                 if (kb[0, i] == 1 && kb[1, i] == 1)
                 {
                     doesEntail.Add(i);
+                }
+            }
+
+            for (int i = 0; i < kb.GetLength(1); i++) // after this, if there is a value where KB is true but alpha is false, automatic no (wipe the list)
+            {
+                if (kb[0, i] == 1 && kb[1, i] == 0)
+                {
+                    doesEntail.Clear();
                 }
             }
 
