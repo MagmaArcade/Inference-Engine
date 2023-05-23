@@ -51,8 +51,8 @@ namespace InferenceEngine
             foreach (string rule in _hornKB)
             {
                 string[] implication = rule.Split(new string[] { "=>" }, StringSplitOptions.RemoveEmptyEntries);
-                string premise = implication[0].Trim();
-                string conclusion = implication[1].Trim();
+                string premise = implication[0];
+                string conclusion = implication[1];
 
                 if (conclusion == query)
                 {

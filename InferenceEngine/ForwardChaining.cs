@@ -53,23 +53,25 @@ namespace InferenceEngine
                 foreach (string rule in _hornKB)
                 {
                     string[] implication = rule.Split(new string[] { "=>" }, StringSplitOptions.RemoveEmptyEntries);
-                    string premise = implication[0].Trim();
+                    string premise = implication[0];
                     string conclusion = "";
+                    string[] conclusions;
 
                     if (premise == query)
                     {
                         if (implication.Count() == 1)
                         {
                             _inferredSymbols.Add(premise); // Adds the premise to the inferred symbols
+                                                           // as if it is a Proposition Symbol without any conclusion it is true
                         }
-                        else if (implication.Count() == 2)
+                        else if (implication.Count() >= 2)
                         {
-                            conclusion = implication[1].Trim();
+                            conclusion = implication[1];
 
                             if (_inferredSymbols.Contains(premise))
                             {
-                                string[] conclusionsi = conclusion.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
-                                foreach (string s in conclusionsi)
+                                conclusions = conclusion.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
+                                foreach (string s in conclusions)
                                 {
                                     _inferredSymbols.Add(s); // Adds the conclusion to the inferred symbols
                                 }
@@ -80,23 +82,17 @@ namespace InferenceEngine
                             }
                         }
 
-                        bool result = true;
-                        string[] conclusions = conclusion.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
 
-                        foreach (string s in conclusions)
+                        foreach (string s in _inferredSymbols)
                         {
-                            if (!ForwardChainingAlg(s))
+                            if (s == _query)
                             {
-                                result = false; // Returns false if any conclusion symbol cannot be proven
-                                break;
+                                //_inferredSymbols.Insert(0, query); // Inserts the goal state at the beginning of the path
+                                return true;            // Returns true if the goal state can be proven based on the premises
                             }
                         }
 
-                        if (result)
-                        {
-                            _inferredSymbols.Insert(0, query); // Inserts the goal state at the beginning of the path
-                            return true;            // Returns true if the goal state can be proven based on the premises
-                        }
+                       
                     }
                 }
             }
