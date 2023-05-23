@@ -18,7 +18,7 @@ namespace InferenceEngine
 
         public TruthTable(string[] hornKB, string query, string[] propositionSymbol)
         {
-            int numbits = propositionSymbol.Length;
+            evint numbits = propositionSymbol.Length;
             int[] _binaryStrings = new int[ numbits ]; // new int array for processing each bit using recursion/backchannelling (temporary variable, does not need a field)
             _truthtable = new int[numbits, (int)Math.Pow(2, numbits)]; // the actual 2D int array which stores every combination of true/false for each symbol, will be written to & read off
 

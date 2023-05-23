@@ -92,7 +92,7 @@ namespace InferenceEngine
             }
 
 
-            errMsg = "NO Soloution";
+            errMsg = "NO Solution";
             return false; // Returns false if the goal state cannot be proven
         }
     }
