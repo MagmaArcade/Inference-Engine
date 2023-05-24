@@ -53,7 +53,12 @@ namespace InferenceEngine
             {
                 string[] implication = rule.Split(new string[] { "=>" }, StringSplitOptions.RemoveEmptyEntries);
                 string premise = implication[0];
-                string conclusion = implication[1];
+                string conclusion = "";
+
+                if (implication.Length > 1)
+                {
+                    conclusion = implication[1];
+                }
 
                 if (conclusion == query)
                 {

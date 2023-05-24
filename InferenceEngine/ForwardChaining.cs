@@ -58,8 +58,11 @@ namespace InferenceEngine
 
                     if (implication.Length == 1) // atomic propositions
                     {
-                        _inferredSymbols.Add(premise); // Adds the premise to the inferred symbols
-                                                       // as if it is a Proposition Symbol without any conclusion, it is true
+                        if (!_inferredSymbols.Contains(premise))
+                        {
+                            _inferredSymbols.Add(premise); // Adds the premise to the inferred symbols
+                                                           // as if it is a Proposition Symbol without any conclusion, it is true
+                        }
                     }
                     else if (implication.Length == 2)
                     {
