@@ -88,6 +88,7 @@ namespace InferenceEngine
                         {
                             if (inferredSymbol == _query)
                             {
+                                _inferredSymbols = _inferredSymbols.Distinct().ToList(); // removes any duplicates
                                 return true;
                             }
                         }

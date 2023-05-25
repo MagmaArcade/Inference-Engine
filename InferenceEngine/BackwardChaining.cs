@@ -76,8 +76,11 @@ namespace InferenceEngine
 
                     if (result)
                     {
+
                         _inferredSymbols.Add(query); // Inserts the goal state at the beginning of the path
+                        _inferredSymbols = _inferredSymbols.Distinct().ToList(); // removes any duplicates
                         return true;            // Returns true if the goal state can be proven based on the premises
+                        
                     }
                 }
             }
