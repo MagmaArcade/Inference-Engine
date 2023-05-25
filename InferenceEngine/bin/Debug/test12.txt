@@ -1,4 +1,4 @@
 TELL 
-dog=>animal; animal=>cat; animal&living => dog; dog; living;
-ASK
-animal
+p2 => p4; a & e => p2; a => e; a;
+ASK 
+p2
