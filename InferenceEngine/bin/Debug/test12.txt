@@ -1,0 +1,4 @@
+TELL 
+dog=>animal; animal=>cat; animal&living => dog; dog; living;
+ASK
+animal
