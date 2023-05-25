@@ -368,7 +368,8 @@ namespace InferenceEngine
             return returnArray;
         }
 
-        // the following code printed out postfixed versions of each sentence for development purposes
+        // the following code printed out postfixed versions of each
+        // sentence for development purposes
         public void printPostfixedSentences(List<string[]> postfixSentences)
         {
             Console.WriteLine("The KB sentences after being placed into postfix arrays:");

@@ -10,6 +10,7 @@ namespace InferenceEngine
         private string _query, _errMsg;               // Represents the goal state to be proven
         private string[] _propositionSymbol; // Contains the proposition symbols
         private List<string> _inferredSymbols;          // Stores the path taken to prove the goal state
+        private int _loopCounter; // put in place to avoid a stack overflow that comes from faulty propositional logic
 
         public BackwardChaining(string[] HornKB, string Query, string[] PropositionSymbol)
         {
@@ -17,6 +18,7 @@ namespace InferenceEngine
             _query = Query;
             _propositionSymbol = PropositionSymbol;
             _inferredSymbols = new List<string>();
+            _loopCounter = 0;
 
             printResults(); // Calls the method to perform backward chaining and print the results
         }
@@ -37,6 +39,13 @@ namespace InferenceEngine
 
         private bool backwardChainingAlg(string query)
         {
+                if (_loopCounter > 5999) // prevents a buffer overflow exception from being thrown because of a logic loop in the sentences - number not exact, found through trial and error
+                {
+                    _errMsg = "Infinite Loop!";
+                    return false;
+                }
+                _loopCounter++;
+
             if (!_propositionSymbol.Contains(query))
             {
                 _errMsg = "Invalid query!"; // Prints an error message if the query is not a valid proposition symbol
